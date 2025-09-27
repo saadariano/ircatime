@@ -10,6 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -232,29 +236,27 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
     <script>
         window.onload = function() {
-
+            
+            // =================================================================
             // FIREBASE CONFIGURATION AND INITIALIZATION
-            // Your web app's Firebase configuration
+            // CRITICAL: YOU MUST REPLACE THE PLACEHOLDERS BELOW
+            // WITH YOUR ACTUAL CONFIGURATION FROM FIREBASE PROJECT SETTINGS
+            // =================================================================
             const firebaseConfig = {
-                apiKey: "AIzaSyC8u_cIIru6BGHNy5Wqv3qt6VWFEli5QME",
+                apiKey: "YOUR_API_KEY", 
                 authDomain: "my-timesheet-app-9199d.firebaseapp.com",
                 projectId: "my-timesheet-app-9199d",
-                storageBucket: "my-timesheet-app-9199d.firebasestorage.app",
-                messagingSenderId: "179740947207",
-                appId: "1:179740947207:web:6a84618c0d15a25f1d4ba2",
-                measurementId: "G-CSX6YMHQBM"
+                storageBucket: "my-timesheet-app-9199d.appspot.com",
+                messagingSenderId: "YOUR_SENDER_ID",
+                appId: "YOUR_APP_ID"
             };
 
             // Initialize Firebase App and Firestore using the compat namespace
             const app = firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-
-            // END FIREBASE SETUP
+            const db = firebase.firestore(); 
+            // =================================================================
 
             let currentYear = new Date().getFullYear();
             let currentMonth = new Date().getMonth();
@@ -627,12 +629,15 @@
                 activeDayData[activeDate] = data;
 
                 // 1. Save to local storage and re-render calendar (Synchronous)
-                saveData(); 
+                saveData();
                 closeModal();
-                
+
                 // 2. Prepare data for Firestore with full date and server timestamp
                 const entryDataForFirestore = {
                     ...data,
+                    day: activeDate,
+                    month: currentMonth + 1,
+                    year: currentYear,
                     fullDate: new Date(currentYear, currentMonth, activeDate).toISOString().split('T')[0],
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -653,8 +658,6 @@
                 if (!activeDate) return;
 
                 if (activeDayData && activeDayData[activeDate]) {
-                    // NOTE: This only deletes locally. You would need logic here
-                    // to find and delete the corresponding document in Firestore.
                     delete activeDayData[activeDate];
                     saveData();
                     closeModal();
