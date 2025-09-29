@@ -10,10 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -32,6 +28,7 @@
             min-height: 80px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden; /* Ensure content doesn't overflow */
         }
         .day-cell:hover {
             transform: translateY(-2px);
@@ -49,6 +46,124 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
+        /* --- CALENDAR COLORS (AS PER REQUEST/PIC 4) --- */
+        .straordinario-day {
+            background-color: #fef3c7 !important; /* yellow-100 */
+            border-color: #f59e0b !important; /* yellow-500 */
+            color: #92400e !important; /* yellow-800 */
+        }
+        .ritardi-day {
+            background-color: #fecaca !important; /* red-200 */
+            border-color: #ef4444 !important; /* red-500 */
+            color: #991b1b !important; /* red-800 */
+        }
+        .permesso-day {
+            background-color: #e9d5ff !important; /* purple-200 */
+            border-color: #8b5cf6 !important; /* purple-500 */
+            color: #581c87 !important; /* purple-800 */
+        }
+        .ponte-day { 
+            background-color: #d1f5e8 !important; /* Teal-100 */
+            border-color: #2dd4bf !important; /* Teal-400 */
+            color: #115e59 !important; /* Teal-800 */
+        }
+        .notte-shift-day {
+            background-color: #1f2937 !important; /* gray-800 */
+            border-color: #4b5563 !important; /* gray-600 */
+            color: #ffffff !important; /* white */
+        }
+        .saturday-cell {
+            background-color: #e0e7ff !important; /* indigo-100 */
+            border-color: #6366f1 !important; /* indigo-500 */
+        }
+        .sunday-cell {
+            background-color: #fce7f3 !important; /* pink-100 */
+            border-color: #ec4899 !important; /* pink-500 */
+        }
+        .regular-day {
+            background-color: #d1fae5 !important; /* green-200 */
+            border-color: #34d399 !important; /* green-500 */
+            color: #065f46 !important; /* green-800 */
+        }
+        .festivita-day {
+            background-color: #fbcfe8 !important; /* pink-200 */
+            border-color: #f472b6 !important; /* pink-400 */
+            color: #9d174d !important; /* pink-800 */
+        }
+        
+        /* Interactive highlighting for summary boxes */
+        .summary-box-simple {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .summary-box-simple:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        .summary-box-simple.active {
+            animation: pulse 0.6s ease-in-out;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            /* background-color: #bfdbfe; /* blue-200 */ */
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        /* Day highlighting styles */
+        .day-highlight {
+            animation: vibrate 0.5s ease-in-out;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.8) !important;
+            border: 3px solid #3b82f6 !important;
+        }
+        @keyframes vibrate {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+        
+        /* --- CORREZIONE: SUMMARY BOX COLORS (AS PER PIC 2) --- */
+        .summary-card {
+            background-color: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+        /* Ore Ordinarie */
+        #summaryRegularBox { background-color: #D4EDDA; border-color: #C3E6CB; }
+        /* Straordinario */
+        #summaryOvertimeBox { background-color: #FFF3CD; border-color: #FFEEBC; }
+        /* Permesso */
+        #summaryPermessoBox { background-color: #D6D8F8; border-color: #D1D5E5; }
+        /* Ferie */
+        #summaryHolidaysBox { background-color: #CCE5FF; border-color: #B8DAFF; }
+        /* Festività */
+        #summaryFestivitaBox { background-color: #F8D7DA; border-color: #F5C6CB; }
+        /* Malattia */
+        #summarySicknessBox { background-color: #F8D7DA; border-color: #F5C6CB; }
+        /* Ponte */
+        #summaryPonteBox { background-color: #D4EDDA; border-color: #C3E6CB; }
+        /* Ritardi */
+        #summaryLatesBox { background-color: #F8D7DA; border-color: #F5C6CB; }
+        /* Turni Notte */
+        #summaryNightShiftBox { background-color: #E2E3E5; border-color: #D6D8DB; }
+        /* Totale */
+        .summary-total {
+            background-color: #EFF6FF; /* blue-50 */
+            border: 1px solid #BFDBFE; /* blue-200 */
+        }
+
+        .summary-card-title {
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            color: #6b7280; /* text-gray-500 */
+            margin-bottom: 4px;
+        }
+        .summary-card-value {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 700; /* font-bold */
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -59,27 +174,55 @@
 
     <div id="main-app" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
         <header class="mb-6 border-b pb-4">
-            <h1 class="text-3xl font-bold text-center text-gray-900">Cartellino Presenze di Saad Mounir</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center">Cartellino Presenze di Saad Mounir</h1>
         </header>
 
         <main class="space-y-6">
-            <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+            <div class="flex flex-col space-y-4 border-b pb-4">
                 <div class="flex items-center space-x-2">
-                    <button id="prevMonthBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
-                        &lt;
-                    </button>
-                    <h2 id="currentMonthYear" class="text-2xl font-bold text-gray-800 w-40 text-center"></h2>
-                    <button id="nextMonthBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
-                        &gt;
-                    </button>
+                    <label for="citySelect" class="block text-sm font-medium text-gray-700">Città di Lavoro (Festa Patronale)</label>
+                    <select id="citySelect" class="block w-full sm:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"></select>
                 </div>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
-                    <select id="monthSelect" class="block w-full sm:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"></select>
-                    <input type="number" id="yearInput" class="block w-full sm:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200" min="2000" max="2100">
+                
+                <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <button id="prevMonthBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                                &lt;
+                            </button>
+                            <span class="text-lg font-medium text-gray-700 w-24 text-center">Mese</span>
+                            <button id="nextMonthBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                                &gt;
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2">
+                            <button id="prevYearBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                                &lt;
+                            </button>
+                            <span class="text-lg font-medium text-gray-700 w-24 text-center">Anno</span>
+                            <button id="nextYearBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                                &gt;
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <h2 id="currentMonthYear" class="text-2xl font-bold text-gray-800 text-center"></h2>
+                    
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                        <select id="monthSelect" class="block w-full sm:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"></select>
+                        <input type="number" id="yearInput" class="block w-full sm:w-auto px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200" min="2000" max="2100">
+                    </div>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+            <div class="flex flex-wrap justify-center items-center gap-4 mt-6">
+                <button id="openHolidayPeriodModalBtn" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Ferie / Festività</span>
+                </button>
                 <button id="createPdfBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-9.586a1 1 0 011.414 0L9 8.586V3a1 1 0 012 0v5.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -105,45 +248,58 @@
             <div id="calendar" class="calendar-grid"></div>
 
             <div class="bg-gray-100 p-6 rounded-xl shadow-inner mt-6">
-                <h3 class="text-xl font-bold mb-4">Riepilogo Mensile</h3>
-                <div id="summary" class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                    <div class="p-3 bg-green-100 border border-green-200 rounded-lg shadow-md">
-                        <p class="text-sm text-green-800 font-medium">Ore Ordinarie</p>
-                        <p id="summaryRegular" class="text-lg font-bold text-green-700">0</p>
+                <h3 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800">Riepilogo Mensile</h3>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                    
+                    <div id="summaryRegularBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Ore Ordinarie</p>
+                        <p id="summaryRegular" class="summary-card-value text-green-700">0.0</p>
                     </div>
-                    <div class="p-3 bg-yellow-100 border border-yellow-200 rounded-lg shadow-md">
-                        <p class="text-sm text-yellow-800 font-medium">Ore di Straordinario</p>
-                        <p id="summaryOvertime" class="text-lg font-bold text-yellow-700">0</p>
+
+                    <div id="summaryOvertimeBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Straordinario</p>
+                        <p id="summaryOvertime" class="summary-card-value text-yellow-700">0.0 ore</p>
                     </div>
-                    <div class="p-3 bg-red-100 border border-red-200 rounded-lg shadow-md">
-                        <p class="text-sm text-red-800 font-medium">Ore Mancanti</p>
-                        <p id="summaryMissing" class="text-lg font-bold text-red-700">0</p>
+                    
+                    <div id="summaryPermessoBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Permesso (Ore)</p>
+                        <p id="summaryPermesso" class="summary-card-value text-purple-700">0.0 ore</p>
                     </div>
-                    <div class="p-3 bg-red-100 border border-red-200 rounded-lg shadow-md">
-                        <p class="text-sm text-red-800 font-medium">Malattia</p>
-                        <p id="summarySickness" class="text-lg font-bold text-red-700">0</p>
+
+                    <div id="summaryHolidaysBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Ferie (Giorni)</p>
+                        <p id="summaryHolidays" class="summary-card-value text-blue-700">0</p>
                     </div>
-                    <div class="p-3 bg-blue-100 border border-blue-200 rounded-lg shadow-md">
-                        <p class="text-sm text-blue-800 font-medium">Ferie</p>
-                        <p id="summaryHolidays" class="text-lg font-bold text-blue-700">0</p>
+                    
+                    <div id="summaryFestivitaBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Festività (Giorni)</p>
+                        <p id="summaryFestivita" class="summary-card-value text-pink-700">0</p>
                     </div>
-                    <div class="p-3 bg-red-100 border border-red-200 rounded-lg shadow-md">
-                        <p class="text-sm text-red-800 font-medium">Assenze</p>
-                        <p id="summaryAbsence" class="text-lg font-bold text-red-700">0</p>
+                    
+                    <div id="summarySicknessBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Malattia (Giorni)</p>
+                        <p id="summarySickness" class="summary-card-value text-red-700">0</p>
                     </div>
-                    <div class="p-3 bg-indigo-100 border border-indigo-200 rounded-lg shadow-md">
-                        <p class="text-sm text-indigo-800 font-medium">Permesso</p>
-                        <p id="summaryPermesso" class="text-lg font-bold text-indigo-700">0</p>
+
+                    <div id="summaryPonteBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Ponte (Giorni)</p>
+                        <p id="summaryPonte" class="summary-card-value text-teal-700">0</p>
                     </div>
-                    <div class="p-3 bg-pink-100 border border-pink-200 rounded-lg shadow-md">
-                        <p class="text-sm text-pink-800 font-medium">Ritardi</p>
-                        <p id="summaryLates" class="text-lg font-bold text-pink-700">0</p>
+
+                    <div id="summaryLatesBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Ritardi (Totali)</p>
+                        <p id="summaryLates" class="summary-card-value text-red-600">0 min</p>
                     </div>
-                </div>
-                <div class="flex justify-center mt-4">
-                    <div class="p-3 bg-blue-100 border border-blue-200 rounded-lg shadow-md w-full sm:w-1/2 md:w-1/3 text-center">
-                        <p class="text-sm text-blue-800 font-medium">Totale Ore Lavorate</p>
-                        <p id="summaryTotal" class="text-lg font-bold text-blue-700">0</p>
+                    
+                    <div id="summaryNightShiftBox" class="summary-card summary-box-simple">
+                        <p class="summary-card-title">Turni Notte</p>
+                        <p id="summaryNightShift" class="summary-card-value text-gray-700">0 giorni</p>
+                    </div>
+
+                    <div class="summary-card summary-total col-span-2 sm:col-span-3 lg:col-span-1 flex flex-col justify-center">
+                        <p class="summary-card-title text-blue-800 text-center">TOTALE ORE CONTABILI</p>
+                        <p id="summaryTotalAllHours" class="text-3xl font-bold text-blue-700 text-center">0.0</p>
                     </div>
                 </div>
             </div>
@@ -159,7 +315,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <button type="button" data-shift="morning" class="shift-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">Mattina (06:00 - 14:00)</button>
                         <button type="button" data-shift="afternoon" class="shift-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">Pomeriggio (14:00 - 22:00)</button>
-                        <button type="button" data-shift="night" class="shift-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">Notte (22:00 - 06:00)</button>
+                        <button type="button" data-shift="notte" class="shift-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200">Notte (22:00 - 06:00)</button>
                     </div>
                 </div>
 
@@ -177,7 +333,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <input type="checkbox" id="overtime" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="overtime" class="text-sm font-medium text-gray-700 ml-2">Straordinario</label>
+                        <label for="overtime" class="text-sm font-medium text-gray-700 ml-2">Straordinario (Totale)</label>
                     </div>
                     <div>
                         <input type="checkbox" id="lates" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -193,16 +349,20 @@
                             Malattia
                         </label>
                         <label class="flex items-center bg-gray-100 rounded-full px-4 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors duration-200">
-                            <input type="checkbox" name="leave" value="absence" class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-2">
-                            Assenza
-                        </label>
-                        <label class="flex items-center bg-gray-100 rounded-full px-4 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors duration-200">
                             <input type="checkbox" name="leave" value="holiday" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-2">
                             Ferie
                         </label>
-                        <label class="flex items-center bg-gray-100 rounded-full px-4 py-2 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors duration-200">
-                            <input type="checkbox" name="leave" value="permesso" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 mr-2">
+                        <label class="flex items-center bg-pink-100 rounded-full px-4 py-2 text-sm font-medium text-pink-700 cursor-pointer hover:bg-pink-200 transition-colors duration-200">
+                            <input type="checkbox" name="leave" value="festivita" class="h-4 w-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500 mr-2">
+                            Festività
+                        </label>
+                        <label class="flex items-center bg-purple-100 rounded-full px-4 py-2 text-sm font-medium text-purple-700 cursor-pointer hover:bg-purple-200 transition-colors duration-200">
+                            <input type="checkbox" name="leave" value="permesso" class="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 mr-2">
                             Permesso
+                        </label>
+                        <label class="flex items-center bg-teal-100 rounded-full px-4 py-2 text-sm font-medium text-teal-700 cursor-pointer hover:bg-teal-200 transition-colors duration-200">
+                            <input type="checkbox" name="leave" value="ponte" class="h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mr-2">
+                            Ponte
                         </label>
                     </div>
                 </div>
@@ -211,6 +371,48 @@
                     <button type="button" id="deleteEntryBtn" class="bg-red-500 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-600 transition-colors duration-200">Elimina</button>
                     <button type="button" id="closeModalBtn" class="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors duration-200">Annulla</button>
                     <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors duration-200">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="holidayPeriodModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md space-y-4">
+            <h3 class="text-2xl font-bold text-gray-800 text-center">Aggiungi Periodo di Ferie/Festività</h3>
+            <form id="holidayPeriodForm" class="space-y-4">
+                <div>
+                    <label for="startDate" class="block text-sm font-medium text-gray-700">Data Inizio</label>
+                    <input type="date" id="startDate" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div>
+                    <label for="endDate" class="block text-sm font-medium text-gray-700">Data Fine</label>
+                    <input type="date" id="endDate" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div>
+                    <label for="holidayType" class="block text-sm font-medium text-gray-700">Tipo</label>
+                    <select id="holidayType" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="Ferie (Estate)">Ferie (Estate)</option>
+                        <option value="Ferie (Durante l'anno)">Ferie (Durante l'anno)</option>
+                        <option value="Capodanno">Festività Nazionale - Capodanno (1 Gennaio)</option>
+                        <option value="Epifania">Festività Nazionale - Epifania (6 Gennaio)</option>
+                        <option value="Pasqua">Festività Nazionale - Pasqua</option>
+                        <option value="Lunedì di Pasqua">Festività Nazionale - Lunedì di Pasqua</option>
+                        <option value="Festa della Liberazione">Festività Nazionale - Festa della Liberazione (25 Aprile)</option>
+                        <option value="Festa del Lavoro">Festività Nazionale - Festa del Lavoro (1 Maggio)</option>
+                        <option value="Festa della Repubblica">Festività Nazionale - Festa della Repubblica (2 Giugno)</option>
+                        <option value="Ferragosto">Festività Nazionale - Ferragosto (15 Agosto)</option>
+                        <option value="Ognissanti">Festività Nazionale - Ognissanti (1 Novembre)</option>
+                        <option value="Immacolata Concezione">Festività Nazionale - Immacolata Concezione (8 Dicembre)</option>
+                        <option value="Natale">Festività Nazionale - Natale (25 Dicembre)</option>
+                        <option value="Santo Stefano">Festività Nazionale - Santo Stefano (26 Dicembre)</option>
+                    </select>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">Giorni selezionati: <span id="daysCountDisplay" class="font-bold">0</span></p>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="closeHolidayModalBtn" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-bold hover:bg-gray-400 transition-colors duration-200">Annulla</button>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors duration-200">Salva Periodo</button>
                 </div>
             </form>
         </div>
@@ -238,141 +440,515 @@
 
     <script>
         window.onload = function() {
-            
-            // =================================================================
-            // FIREBASE CONFIGURATION AND INITIALIZATION
-            // CRITICAL: YOU MUST REPLACE THE PLACEHOLDERS BELOW
-            // WITH YOUR ACTUAL CONFIGURATION FROM FIREBASE PROJECT SETTINGS
-            // =================================================================
-            const firebaseConfig = {
-                apiKey: "YOUR_API_KEY", 
-                authDomain: "my-timesheet-app-9199d.firebaseapp.com",
-                projectId: "my-timesheet-app-9199d",
-                storageBucket: "my-timesheet-app-9199d.appspot.com",
-                messagingSenderId: "YOUR_SENDER_ID",
-                appId: "YOUR_APP_ID"
+            const MONTH_NAMES = [
+                'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+                'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+            ];
+            const WEEKDAY_NAMES = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+            const storageKeyPrefix = 'timecard-saad-';
+            const EXPECTED_SHIFT_START = '06:00'; 
+            const FULL_DAY_HOURS = 8; 
+            const HOURS_PER_DAY_COUNT = 8; 
+
+            // --- Feste Patronali Data Structure (Only Fixed Dates are reliable for auto-setting) ---
+            const FESTE_PATRONALI = {
+                'Agra': { date: '08-02', name: 'Sant’Eusebio di Vercelli' },
+                'Albizzate': { date: '08-26', name: 'Sant’Alessandro' },
+                'Angera': { date: '08-15', name: 'Maria SS. Assunta' },
+                'Arcisate': { date: '05-08', name: 'San Vittore' },
+                'Azzio': { date: '03-25', name: 'Maria SS. Annunziata' },
+                'Barasso': { date: '11-11', name: 'San Martino' },
+                'Bardello': { date: '12-26', name: 'Santo Stefano' },
+                'Bedero Valcuvia': { date: '01-14', name: 'Sant’Ilario' },
+                'Besano': { date: '11-11', name: 'San Martino' },
+                'Besnate': { date: '11-11', name: 'San Martino' },
+                'Besozzo': { date: '08-26', name: 'Sant’Alessandro' },
+                'Biandronno': { date: '08-10', name: 'San Lorenzo' },
+                'Bisuschio': { date: '04-23', name: 'San Giorgio' },
+                'Bodio Lomnago': { date: '07-26', name: 'Sant’Anna' },
+                'Brebbia': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Bregano': { date: '08-15', name: 'Maria SS. Assunta' },
+                'Brenta': { date: '06-15', name: 'SS. Vito e Modesto' },
+                'Brezzo di Bedero': { date: '05-08', name: 'San Vittore' },
+                'Brinzio': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Brusimpiano': { date: '09-08', name: 'Natività di Maria Vergine' },
+                'Brunello': { date: '03-25', name: 'Maria SS. Annunziata' },
+                'Buguggiate': { date: '05-08', name: 'San Vittore' },
+                'Busto Arsizio': { date: '06-24', name: 'San Giovanni Battista' },
+                'Cadegliano-Viconago': { date: '12-31', name: 'San Silvestro' },
+                'Cadrezzate': { date: '07-20', name: 'Santa Margherita' },
+                'Cantello': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Caravate': { date: '06-24', name: 'SS. Giovanni Battista e Maurizio' },
+                'Cardano al Campo': { date: '01-22', name: 'Sant’Anastasio' },
+                'Carnago': { date: '11-11', name: 'San Martino' },
+                'Caronno Pertusella': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Caronno Varesino': { date: '01-22', name: 'San Vincenzo Martire' },
+                'Casale Litta': { date: '02-03', name: 'San Biagio' },
+                'Casalzuigno': { date: '05-08', name: 'San Vittore Martire' },
+                'Casciago': { date: '08-01', name: 'Sant’Eusebio' },
+                'Cassano Valcuvia': { date: '08-13', name: 'SS. Ippolito e Cassiano' },
+                'Castelveccana': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Castronno': { date: '07-28', name: 'SS. Nazario e Celso' },
+                'Cavaria con Premezzo': { date: '06-16', name: 'SS. Quirico e Giulitta' },
+                'Cazzago Brabbia': { date: '11-04', name: 'San Carlo' },
+                'Cittiglio': { date: '01-31', name: 'San Giulio' },
+                'Clivio': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Cocquio-Trevisago': { date: '11-30', name: 'Sant’Andrea' },
+                'Comabbio': { date: '07-25', name: 'San Giacomo' },
+                'Comerio': { date: '08-13', name: 'SS. Ippolito e Cassiano' },
+                'Cremenaga': { date: '03-15', name: 'Maria SS. Annunziata' },
+                'Crosio della Valle': { date: '07-23', name: 'Sant’Apollinare' },
+                'Cuasso al Monte': { date: '12-07', name: 'Sant’Ambrogio' },
+                'Cunardo': { date: '08-31', name: 'Sant’Abbondio' },
+                'Cuveglio': { date: '08-10', name: 'San Lorenzo' },
+                'Cuvio': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Dumenza': { date: '04-23', name: 'San Giorgio' },
+                'Duno': { date: '01-09', name: 'San Giuliano' },
+                'Fagnano Olona': { date: '01-22', name: 'San Gaudenzio' },
+                'Ferrera di Varese': { date: '07-22', name: 'Santa Maria Maddalena' },
+                'Gallarate': { date: '07-25', name: 'San Cristoforo di Licia' },
+                'Galliate Lombardo': { date: '06-19', name: 'SS. Gervasio e Protasio' },
+                'Gavirate': { date: '12-27', name: 'San Giovanni Evangelista' },
+                'Gemonio': { date: '08-16', name: 'San Rocco' },
+                'Gerenzano': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Germignaga': { date: '06-24', name: 'San Giovanni Battista' },
+                'Golasecca': { date: '08-15', name: 'Maria SS. Assunta' },
+                'Gorla Maggiore': { date: '08-16', name: 'San Rocco' },
+                'Gorla Minore': { date: '08-10', name: 'San Lorenzo' },
+                'Gornate Olona': { date: '05-08', name: 'San Vittore' },
+                'Grantola': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Inarzo': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Induno Olona': { date: '06-24', name: 'San Giovanni Battista' },
+                'Leggiuno': { date: '12-26', name: 'Santo Stefano' },
+                'Lonate Ceppino': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Lonate Pozzolo': { date: '12-07', name: 'Sant’Ambrogio' },
+                'Lozza': { date: '11-13', name: 'Sant’Antonino Martire' },
+                'Luino': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Luvinate': { date: '08-13', name: 'SS. Ippolito e Cassiano' },
+                'Malgesso': { date: '09-29', name: 'San Michele Arcangelo' },
+                'Malnate': { date: '11-11', name: 'San Martino' },
+                'Marchirolo': { date: '11-11', name: 'San Martino' },
+                'Marnate': { date: '09-13', name: 'Sant’Ilario' },
+                'Marzio': { date: '01-20', name: 'San Sebastiano' },
+                'Mercallo': { date: '01-27', name: 'San Giovanni Evangelista' },
+                'Mesenzana': { date: '02-02', name: 'Purificazione di Maria Santissima' },
+                'Montegrino Valtravaglia': { date: '12-07', name: 'Sant’Ambrogio' },
+                'Monvalle': { date: '12-26', name: 'Santo Stefano' },
+                'Morazzone': { date: '12-07', name: 'Sant’Ambrogio' },
+                'Mornago': { date: '09-29', name: 'San Michele Arcangelo' },
+                'Orino': { date: '08-10', name: 'San Lorenzo' },
+                'Osmate': { date: '09-26', name: 'SS. Cosma e Damiano' },
+                'Pino sulla Sponda del Lago Maggiore': { date: '06-16', name: 'SS. Quirico e Giulitta' },
+                'Porto Ceresio': { date: '12-07', name: 'Sant’Ambrogio' },
+                'Porto Valtravaglia': { date: '08-15', name: 'Maria SS. Assunta' },
+                'Rancio Valcuvia': { date: '01-20', name: 'SS. Sebastiano e Fabiano' },
+                'Ranco': { date: '08-10', name: 'San Lorenzo' },
+                'Saltrio': { date: '06-19', name: 'SS. Gervasio e Protasio' },
+                'Samarate': { date: '08-16', name: 'San Rocco' },
+                'Sangiano': { date: '11-30', name: 'Sant’Andrea' },
+                'Saronno': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Sesto Calende': { date: '05-20', name: 'San Bernardino da Siena' },
+                'Solbiate Arno': { date: '09-22', name: 'San Maurizio' },
+                'Solbiate Olona': { date: '07-26', name: 'Sant’Anna' },
+                'Somma Lombardo': { date: '01-21', name: 'Sant’Agnese' },
+                'Sumirago': { date: '08-10', name: 'San Lorenzo' },
+                'Taino': { date: '12-26', name: 'Santo Stefano' },
+                'Ternate': { date: '06-16', name: 'SS. Quirico e Giulitta' },
+                'Tradate': { date: '12-26', name: 'Santo Stefano' },
+                'Tronzano Lago Maggiore': { date: '08-16', name: 'San Rocco' },
+                'Uboldo': { date: '06-29', name: 'SS. Pietro e Paolo' },
+                'Valganna': { date: '02-04', name: 'San Gemolo' },
+                'Varano Borghi': { date: '11-30', name: 'Sant’Andrea' },
+                'Vedano Olona': { date: '09-22', name: 'San Maurizio' },
+                'Veddasca': { date: '08-10', name: 'San Lorenzo' },
+                'Venegono Inferiore': { date: '05-03', name: 'SS. Giacomo e Filippo' },
+                'Venegono Superiore': { date: '04-23', name: 'San Giorgio' },
+                'Vergiate': { date: '11-11', name: 'San Martino' },
+                'Viggiù': { date: '08-03', name: 'Santo Stefano' },
+                'Vizzola Ticino': { date: '12-26', name: 'Santo Stefano' },
+                'Brissago - Valtravaglia': { date: '04-23', name: 'San Giorgio' },
+                'Castelseprio': { date: '09-15', name: 'Santa Maria Addolorata' }, 
+                'Castiglione Olona': { date: '10-07', name: 'Beata Vergine del Rosario' }, 
+                'Laveno Mombello': { date: '05-03', name: 'SS. Filippo e Giacomo' }, 
+                'Travedona Monate': { date: '06-15', name: 'SS. Vito, Modesto e Crescenzio' }, 
             };
+            const CITY_NAMES = Object.keys(FESTE_PATRONALI).sort();
 
-            // Initialize Firebase App and Firestore using the compat namespace
-            const app = firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore(); 
-            // =================================================================
-
-            let currentYear = new Date().getFullYear();
             let currentMonth = new Date().getMonth();
+            let currentYear = new Date().getFullYear();
+            let activeDayData = {};
+            let activeDate = null;
 
             const calendarEl = document.getElementById('calendar');
-            const summaryEl = document.getElementById('summary');
+            const currentMonthYearEl = document.getElementById('currentMonthYear');
             const monthSelectEl = document.getElementById('monthSelect');
             const yearInputEl = document.getElementById('yearInput');
-            const currentMonthYearEl = document.getElementById('currentMonthYear');
-            const prevMonthBtn = document.getElementById('prevMonthBtn');
-            const nextMonthBtn = document.getElementById('nextMonthBtn');
-
             const entryModalEl = document.getElementById('entryModal');
-            const entryFormEl = document.getElementById('entryForm');
             const modalDateTitleEl = document.getElementById('modalDateTitle');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const deleteEntryBtn = document.getElementById('deleteEntryBtn');
-            const shiftButtons = document.querySelectorAll('.shift-btn');
+            const entryFormEl = document.getElementById('entryForm');
             const clockInEl = document.getElementById('clockIn');
             const clockOutEl = document.getElementById('clockOut');
             const overtimeEl = document.getElementById('overtime');
             const latesEl = document.getElementById('lates');
-            
-            const createPdfBtn = document.getElementById('createPdfBtn');
-            const exportBtn = document.getElementById('exportBtn');
-            const importFile = document.getElementById('importFile');
-
+            const closeModalBtnEl = document.getElementById('closeModalBtn');
+            const deleteEntryBtnEl = document.getElementById('deleteEntryBtn');
+            const createPdfBtnEl = document.getElementById('createPdfBtn');
+            const exportBtnEl = document.getElementById('exportBtn');
+            const importFileEl = document.getElementById('importFile');
+            const pdfSelectionModal = document.getElementById('pdfSelectionModal');
+            const generatePdfBtn = document.getElementById('generatePdfBtn');
             const messageBox = document.getElementById('messageBox');
             const messageText = document.getElementById('messageText');
             const messageBoxCloseBtn = document.getElementById('messageBoxCloseBtn');
-
-            // New PDF modal elements
-            const pdfSelectionModal = document.getElementById('pdfSelectionModal');
-            const pdfMonthSelect = document.getElementById('pdfMonthSelect');
-            const pdfYearInput = document.getElementById('pdfYearInput');
-            const closePdfModalBtn = document.getElementById('closePdfModalBtn');
-            const generatePdfBtn = document.getElementById('generatePdfBtn');
-
-            const MONTH_NAMES = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
-            const SHIFTS = {
-                'morning': { clockIn: '06:00', clockOut: '14:00', hours: 8, label: '06:00 - 14:00' },
-                'afternoon': { clockIn: '14:00', clockOut: '22:00', hours: 8, label: '14:00 - 22:00' },
-                'night': { clockIn: '22:00', clockOut: '06:00', hours: 8, label: '22:00 - 06:00' },
-            };
-
-            let activeDayData = null;
-            let activeDate = null;
-            const storageKeyPrefix = 'timecard-';
-
-            function showMessage(message) {
-                messageText.textContent = message;
-                messageBox.classList.remove('hidden');
-            }
-
-            function hideMessage() {
-                messageBox.classList.add('hidden');
-            }
+            const openHolidayPeriodModalBtn = document.getElementById('openHolidayPeriodModalBtn');
+            const holidayPeriodModal = document.getElementById('holidayPeriodModal');
+            const citySelectEl = document.getElementById('citySelect'); 
 
             function initApp() {
-                populateMonthYearSelectors();
-                yearInputEl.value = currentYear;
-                monthSelectEl.value = currentMonth;
-                
-                yearInputEl.addEventListener('change', updateCalendar);
-                monthSelectEl.addEventListener('change', updateCalendar);
-                prevMonthBtn.addEventListener('click', () => changeMonth(-1));
-                nextMonthBtn.addEventListener('click', () => changeMonth(1));
-                closeModalBtn.addEventListener('click', closeModal);
-                deleteEntryBtn.addEventListener('click', deleteEntry);
+                populateMonthSelect();
+                populatePdfMonthSelect();
+                populateCitySelect(); 
+                loadDataAndRender();
+                attachEventListeners();
+                setupInteractiveHighlighting();
+                applyPatronalFestivity(); 
+            }
+
+            function attachEventListeners() {
+                document.getElementById('prevMonthBtn').addEventListener('click', () => changeMonth(-1));
+                document.getElementById('nextMonthBtn').addEventListener('click', () => changeMonth(1));
+                document.getElementById('prevYearBtn').addEventListener('click', () => changeYear(-1));
+                document.getElementById('nextYearBtn').addEventListener('click', () => changeYear(1));
+                monthSelectEl.addEventListener('change', handleMonthChange);
+                yearInputEl.addEventListener('change', handleYearChange);
+                citySelectEl.addEventListener('change', handleCityChange); 
+                closeModalBtnEl.addEventListener('click', closeModal);
+                deleteEntryBtnEl.addEventListener('click', deleteEntry);
                 entryFormEl.addEventListener('submit', handleSaveEntry);
-                messageBoxCloseBtn.addEventListener('click', hideMessage);
-                createPdfBtn.addEventListener('click', openPdfModal);
-                exportBtn.addEventListener('click', exportData);
-                importFile.addEventListener('change', importData);
-
-                closePdfModalBtn.addEventListener('click', () => pdfSelectionModal.classList.add('hidden'));
+                createPdfBtnEl.addEventListener('click', openPdfModal);
+                exportBtnEl.addEventListener('click', exportData);
+                importFileEl.addEventListener('change', importData);
                 generatePdfBtn.addEventListener('click', handleGeneratePdf);
+                document.getElementById('closePdfModalBtn').addEventListener('click', () => pdfSelectionModal.classList.add('hidden'));
+                messageBoxCloseBtn.addEventListener('click', () => messageBox.classList.add('hidden'));
+                openHolidayPeriodModalBtn.addEventListener('click', () => holidayPeriodModal.classList.remove('hidden'));
+                document.getElementById('closeHolidayModalBtn').addEventListener('click', () => holidayPeriodModal.classList.add('hidden'));
+                document.getElementById('holidayPeriodForm').addEventListener('submit', handleHolidayPeriodSave);
+                document.getElementById('startDate').addEventListener('change', updateDaysCount);
+                document.getElementById('endDate').addEventListener('change', updateDaysCount);
 
-                shiftButtons.forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const shift = e.target.dataset.shift;
-                        const { clockIn, clockOut } = SHIFTS[shift];
-                        clockInEl.value = clockIn;
-                        clockOutEl.value = clockOut;
-                        // Uncheck leave options when a shift is selected
-                        document.querySelectorAll('input[name="leave"]').forEach(checkbox => checkbox.checked = false);
-                    });
+                document.querySelectorAll('.shift-btn').forEach(btn => {
+                    btn.addEventListener('click', handleShiftSelection);
                 });
+            }
 
-                document.querySelectorAll('input[name="leave"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', (e) => {
-                        if (e.target.checked) {
-                             // Clear clock in/out times and checkboxes when a leave option is selected
-                            clockInEl.value = '';
-                            clockOutEl.value = '';
-                            overtimeEl.checked = false;
-                            latesEl.checked = false;
+            // --- City Selector Logic ---
+            function populateCitySelect() {
+                citySelectEl.innerHTML = '<option value="">Seleziona la Città...</option>';
+                CITY_NAMES.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelectEl.appendChild(option);
+                });
+                const savedCity = localStorage.getItem(storageKeyPrefix + 'city');
+                if (savedCity) {
+                    citySelectEl.value = savedCity;
+                }
+            }
+
+            function handleCityChange() {
+                const selectedCity = citySelectEl.value;
+                if (selectedCity) {
+                    localStorage.setItem(storageKeyPrefix + 'city', selectedCity);
+                    showMessage(`Città di lavoro impostata su ${selectedCity}. Applico le Feste Patronali.`);
+                } else {
+                    localStorage.removeItem(storageKeyPrefix + 'city');
+                    showMessage('Festa Patronale disabilitata.');
+                }
+                applyPatronalFestivity();
+                saveData(); 
+                loadDataAndRender();
+            }
+
+            function getPatronalDate(city, year, month, day) {
+                const festivity = FESTE_PATRONALI[city];
+                if (!festivity || festivity.type === 'dynamic') return null;
+
+                const [fMonth, fDay] = festivity.date.split('-').map(Number);
+                if (fMonth === month + 1 && fDay === day) {
+                    return { name: festivity.name, date: `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` };
+                }
+                return null;
+            }
+
+            function applyPatronalFestivity() {
+                const selectedCity = localStorage.getItem(storageKeyPrefix + 'city');
+                if (!selectedCity) return;
+
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                let changesMade = false;
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const patronalInfo = getPatronalDate(selectedCity, currentYear, currentMonth, day);
+                    
+                    if (patronalInfo) {
+                        if (!activeDayData[dateKey] || (activeDayData[dateKey].festivita === false && activeDayData[dateKey].note?.startsWith('Festa Patronale') !== true)) {
+                            // Only overwrite if the day is empty or NOT already a user-defined absence/work day.
+                            if (!activeDayData[dateKey] || (!activeDayData[dateKey].sickness && !activeDayData[dateKey].holiday && !activeDayData[dateKey].permesso && !activeDayData[dateKey].ponte && !activeDayData[dateKey].clockIn)) {
+                                activeDayData[dateKey] = {
+                                    clockIn: '', clockOut: '', overtime: false, lates: false,
+                                    sickness: false, holiday: false, permesso: false, ponte: false, 
+                                    festivita: true,
+                                    note: `Festa Patronale - ${patronalInfo.name}`
+                                };
+                                changesMade = true;
+                            }
                         }
-                    });
+                    }
+                }
+
+                if (changesMade) {
+                    saveData();
+                }
+            }
+            // --- END City Selector Logic ---
+
+            function setupInteractiveHighlighting() {
+                // Add click listeners to summary boxes for interactive highlighting
+                const summaryBoxes = [
+                    { id: 'summaryRegularBox', type: 'regular' },
+                    { id: 'summaryLatesBox', type: 'lates' },
+                    { id: 'summarySicknessBox', type: 'sickness' },
+                    { id: 'summaryPermessoBox', type: 'permesso' },
+                    { id: 'summaryHolidaysBox', type: 'holiday' },
+                    { id: 'summaryFestivitaBox', type: 'festivita' },
+                    { id: 'summaryOvertimeBox', type: 'overtime' },
+                    { id: 'summaryNightShiftBox', type: 'notte' },
+                    { id: 'summaryPonteBox', type: 'ponte' } 
+                ];
+
+                summaryBoxes.forEach(box => {
+                    const element = document.getElementById(box.id);
+                    if (element) {
+                        element.addEventListener('click', () => highlightDaysByType(box.type));
+                    }
+                });
+            }
+
+            function highlightDaysByType(type) {
+                // Remove existing highlights
+                document.querySelectorAll('.day-highlight').forEach(el => {
+                    el.classList.remove('day-highlight');
                 });
 
-                loadDataAndRender();
+                // Add active class to clicked summary box
+                document.querySelectorAll('.summary-box-simple').forEach(box => {
+                    box.classList.remove('active');
+                });
+                
+                const summaryBoxIdMap = {
+                    'regular': 'summaryRegularBox',
+                    'lates': 'summaryLatesBox',
+                    'sickness': 'summarySicknessBox',
+                    'permesso': 'summaryPermessoBox',
+                    'holiday': 'summaryHolidaysBox',
+                    'festivita': 'summaryFestivitaBox',
+                    'overtime': 'summaryOvertimeBox',
+                    'notte': 'summaryNightShiftBox',
+                    'ponte': 'summaryPonteBox' 
+                };
+                
+                const summaryBox = document.getElementById(summaryBoxIdMap[type]);
+                if (summaryBox) {
+                    summaryBox.classList.add('active');
+                }
+
+                // Highlight matching days
+                const dayElements = document.querySelectorAll('.day-cell');
+                dayElements.forEach(dayEl => {
+                    const dateKey = dayEl.dataset.date;
+                    if (dateKey && activeDayData[dateKey]) {
+                        const data = activeDayData[dateKey];
+                        let shouldHighlight = false;
+
+                        switch (type) {
+                            case 'regular':
+                                const totalHours = data.clockIn && data.clockOut ? calculateTotalHours(data.clockIn, data.clockOut) : 0;
+                                let currentRegular = 0;
+                                // --- CORREZIONE: LOGICA REGULAR HOURS (NON INFLUENZATA DA RITARDO) ---
+                                if (data.clockIn && data.clockOut && !data.overtime && !data.permesso) {
+                                     currentRegular = Math.min(totalHours, FULL_DAY_HOURS);
+                                }
+                                if (currentRegular > 0) shouldHighlight = true;
+                                break;
+                            case 'lates':
+                                // --- CORREZIONE: LOGICA HIGHLIGHT RITARDO ---
+                                shouldHighlight = data.lates && data.clockIn && calculateLateMinutes(data.clockIn, EXPECTED_SHIFT_START) > 0;
+                                break;
+                            case 'sickness':
+                                shouldHighlight = data.sickness;
+                                break;
+                            case 'permesso':
+                                shouldHighlight = data.permesso;
+                                break;
+                            case 'holiday':
+                                shouldHighlight = data.holiday;
+                                break;
+                            case 'festivita':
+                                shouldHighlight = data.festivita;
+                                break;
+                            case 'ponte': 
+                                shouldHighlight = data.ponte;
+                                break;
+                            case 'overtime':
+                                const dayTotalHours = data.clockIn && data.clockOut ? calculateTotalHours(data.clockIn, data.clockOut) : 0;
+                                // --- CORREZIONE: LOGICA HIGHLIGHT STRAORDINARIO ---
+                                let dayOvertimeHours = 0;
+                                if (data.overtime) { dayOvertimeHours = dayTotalHours; }
+                                else if (!data.permesso && dayTotalHours > FULL_DAY_HOURS) { dayOvertimeHours = dayTotalHours - FULL_DAY_HOURS; }
+                                shouldHighlight = dayOvertimeHours > 0;
+                                break;
+                            case 'notte': 
+                                shouldHighlight = isNightShift(data.clockIn, data.clockOut) && !data.overtime; // Night shift only if not explicitly marked as full overtime
+                                break;
+                        }
+
+                        if (shouldHighlight) {
+                            dayEl.classList.add('day-highlight');
+                        }
+                    }
+                });
+
+                // Remove highlights after 3 seconds
+                setTimeout(() => {
+                    document.querySelectorAll('.day-highlight').forEach(el => {
+                        el.classList.remove('day-highlight');
+                    });
+                    document.querySelectorAll('.summary-box-simple').forEach(box => {
+                        box.classList.remove('active');
+                    });
+                }, 3000);
             }
 
-            function populateMonthYearSelectors() {
-                const monthsHtml = MONTH_NAMES.map((month, index) => `<option value="${index}">${month}</option>`).join('');
-                monthSelectEl.innerHTML = monthsHtml;
-                pdfMonthSelect.innerHTML = monthsHtml;
-                yearInputEl.value = currentYear;
-                pdfYearInput.value = currentYear;
+            function updateDaysCount() {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                if (startDate && endDate) {
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    document.getElementById('daysCountDisplay').textContent = diffDays;
+                } else {
+                    document.getElementById('daysCountDisplay').textContent = '0';
+                }
             }
 
-            function updateCalendar() {
-                currentMonth = parseInt(monthSelectEl.value);
-                currentYear = parseInt(yearInputEl.value);
-                loadDataAndRender();
+            function handleHolidayPeriodSave(e) {
+                e.preventDefault();
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const holidayType = document.getElementById('holidayType').value;
+
+                if (!startDate || !endDate) {
+                    showMessage('Seleziona entrambe le date');
+                    return;
+                }
+
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                
+                if (start > end) {
+                    showMessage('La data di inizio deve essere precedente alla data di fine');
+                    return;
+                }
+
+                const isHoliday = holidayType.includes('Ferie');
+                const isFestivita = !isHoliday;
+
+                let currentDate = new Date(start);
+                let addedDays = 0;
+                
+                while (currentDate <= end) {
+                    const year = currentDate.getFullYear();
+                    const month = currentDate.getMonth() + 1;
+                    const day = currentDate.getDate();
+                    const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    let targetData = activeDayData;
+                    const isCurrentMonth = year === currentYear && month - 1 === currentMonth;
+
+                    if (!isCurrentMonth) {
+                        const key = `${storageKeyPrefix}${year}-${month}`;
+                        const storedData = localStorage.getItem(key);
+                        targetData = storedData ? JSON.parse(storedData) : {};
+                    }
+
+                    if (!targetData[dateKey]) {
+                        targetData[dateKey] = {};
+                    }
+
+                    // Reset all absence types for the day before setting the new one
+                    targetData[dateKey].sickness = false;
+                    targetData[dateKey].holiday = false;
+                    targetData[dateKey].festivita = false;
+                    targetData[dateKey].permesso = false;
+                    targetData[dateKey].ponte = false; 
+                    targetData[dateKey].note = holidayType; 
+                    targetData[dateKey].clockIn = ''; 
+                    targetData[dateKey].clockOut = '';
+                    targetData[dateKey].overtime = false;
+                    targetData[dateKey].lates = false;
+
+
+                    if (isHoliday) {
+                        targetData[dateKey].holiday = true;
+                    } else if (isFestivita) {
+                        targetData[dateKey].festivita = true;
+                    }
+
+                    if (!isCurrentMonth) {
+                        const key = `${storageKeyPrefix}${year}-${month}`;
+                        localStorage.setItem(key, JSON.stringify(targetData));
+                    }
+
+                    addedDays++;
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                saveData();
+                holidayPeriodModal.classList.add('hidden');
+                showMessage(`Aggiunti ${addedDays} giorni di ${isHoliday ? 'ferie' : 'festività'}`);
+                
+                holidayPeriodForm.reset();
+                document.getElementById('daysCountDisplay').textContent = '0';
+                
+                if (start <= new Date(currentYear, currentMonth + 1, 0) && end >= new Date(currentYear, currentMonth, 1)) {
+                     loadDataAndRender();
+                }
+            }
+
+            function populateMonthSelect() {
+                monthSelectEl.innerHTML = '';
+                MONTH_NAMES.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = month;
+                    monthSelectEl.appendChild(option);
+                });
+            }
+
+            function populatePdfMonthSelect() {
+                document.getElementById('pdfMonthSelect').innerHTML = '';
+                MONTH_NAMES.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = month;
+                    document.getElementById('pdfMonthSelect').appendChild(option);
+                });
             }
 
             function changeMonth(delta) {
@@ -384,201 +960,447 @@
                     currentMonth = 0;
                     currentYear++;
                 }
-                monthSelectEl.value = currentMonth;
-                yearInputEl.value = currentYear;
-                updateCalendar();
+                loadDataAndRender();
+            }
+
+            function changeYear(delta) {
+                currentYear += delta;
+                loadDataAndRender();
+            }
+
+            function handleMonthChange() {
+                currentMonth = parseInt(monthSelectEl.value);
+                loadDataAndRender();
+            }
+
+            function handleYearChange() {
+                currentYear = parseInt(yearInputEl.value);
+                loadDataAndRender();
+            }
+
+            function handleShiftSelection(e) {
+                const shift = e.target.dataset.shift;
+                document.querySelectorAll('.shift-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                });
+                e.target.classList.remove('bg-gray-200', 'text-gray-800');
+                e.target.classList.add('bg-blue-500', 'text-white');
+
+                switch (shift) {
+                    case 'morning':
+                        clockInEl.value = '06:00';
+                        clockOutEl.value = '14:00';
+                        break;
+                    case 'afternoon':
+                        clockInEl.value = '14:00';
+                        clockOutEl.value = '22:00';
+                        break;
+                    case 'notte':
+                        clockInEl.value = '22:00';
+                        clockOutEl.value = '06:00';
+                        break;
+                }
             }
 
             function loadDataAndRender() {
                 const key = `${storageKeyPrefix}${currentYear}-${currentMonth + 1}`;
                 const storedData = localStorage.getItem(key);
                 activeDayData = storedData ? JSON.parse(storedData) : {};
+                
+                applyPatronalFestivity(); 
                 renderCalendar();
-                renderSummary();
+                updateSummary();
+                updateControls();
             }
 
             function saveData() {
                 const key = `${storageKeyPrefix}${currentYear}-${currentMonth + 1}`;
                 localStorage.setItem(key, JSON.stringify(activeDayData));
-                loadDataAndRender();
+                renderCalendar();
+                updateSummary();
+            }
+
+            function updateControls() {
+                currentMonthYearEl.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+                monthSelectEl.value = currentMonth;
+                yearInputEl.value = currentYear;
+            }
+
+            function calculateTotalHours(clockIn, clockOut) {
+                if (!clockIn || !clockOut) return 0;
+                
+                const inTime = new Date(`1970-01-01T${clockIn}:00`);
+                let outTime = new Date(`1970-01-01T${clockOut}:00`);
+                
+                if (outTime <= inTime) {
+                    outTime = new Date(outTime.getTime() + 24 * 60 * 60 * 1000);
+                }
+                
+                const diffInMs = outTime - inTime;
+                // Round to one decimal place for hours (e.g., 7.5 hours for 7h 30m)
+                return Math.round((diffInMs / (1000 * 60 * 60)) * 10) / 10;
+            }
+
+            function calculateLateMinutes(clockIn, expectedStart = EXPECTED_SHIFT_START) {
+                if (!clockIn) return 0;
+                
+                const actualStart = new Date(`1970-01-01T${clockIn}:00`);
+                const expected = new Date(`1970-01-01T${expectedStart}:00`);
+                
+                if (actualStart <= expected) return 0;
+                
+                const diffInMs = actualStart - expected;
+                return Math.ceil(diffInMs / (1000 * 60)); 
+            }
+
+            function formatMinutesToHours(totalMinutes) {
+                if (totalMinutes <= 0) return '0 min';
+                
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                
+                let display = '';
+                if (hours > 0) {
+                    display += `${hours} ore`;
+                    if (minutes > 0) {
+                        display += ` e ${minutes} min`;
+                    }
+                } else {
+                    display += `${minutes} min`;
+                }
+                return display;
+            }
+
+            // --- LOGICA ORE/GIORNI ---
+            function formatHoursToDays(totalHours, hoursPerDay = HOURS_PER_DAY_COUNT) {
+                if (totalHours <= 0) return '0.0 ore';
+                
+                const totalDays = Math.floor(totalHours / hoursPerDay);
+                let remainingHours = totalHours % hoursPerDay;
+                
+                // Keep one decimal for remaining hours
+                remainingHours = Math.round(remainingHours * 10) / 10;
+                
+                if (totalDays > 0) {
+                    let display = `${totalDays} giorni`;
+                    if (remainingHours > 0) {
+                        display += ` e ${remainingHours.toFixed(1)} ore`;
+                    }
+                    return display;
+                } else {
+                    return `${totalHours.toFixed(1)} ore`;
+                }
+            }
+
+            function isNightShift(clockIn, clockOut) {
+                if (!clockIn || !clockOut) return false;
+                
+                const inHour = parseInt(clockIn.split(':')[0]);
+                const outHour = parseInt(clockOut.split(':')[0]);
+                
+                // Night shift is typically 22:00 to 06:00
+                return (inHour >= 22) || (inHour > outHour && outHour <= 6);
             }
 
             function renderCalendar() {
                 calendarEl.innerHTML = '';
-                currentMonthYearEl.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
                 
-                const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                
-                const weekdays = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
-                weekdays.forEach(day => {
+                WEEKDAY_NAMES.forEach(day => {
                     const dayHeader = document.createElement('div');
-                    dayHeader.className = 'text-center font-bold text-gray-700';
+                    dayHeader.className = 'text-center font-bold text-gray-600 py-2';
                     dayHeader.textContent = day;
                     calendarEl.appendChild(dayHeader);
                 });
 
-                for (let i = 0; i < firstDayOfMonth; i++) {
+                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                const adjustedFirstDay = (firstDay === 0) ? 6 : firstDay - 1;
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+                for (let i = 0; i < adjustedFirstDay; i++) {
                     const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-cell';
                     calendarEl.appendChild(emptyCell);
                 }
 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dayCell = document.createElement('div');
-                    dayCell.className = 'day-cell rounded-lg p-2 text-center text-sm relative border shadow-sm flex flex-col items-center justify-start';
-                    dayCell.dataset.day = day;
+                    const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    dayCell.dataset.date = dateKey;
                     
-                    const dayNumber = document.createElement('p');
-                    dayNumber.className = 'text-lg font-bold text-gray-800';
-                    dayNumber.textContent = day;
-                    dayCell.appendChild(dayNumber);
-
-                    const data = activeDayData ? activeDayData[day] : null;
+                    const data = activeDayData[dateKey] || {}; 
+                    let cellClass = 'day-cell p-2 rounded-lg flex flex-col justify-between';
+                    let cellContent = `<div class="font-bold text-gray-800">${day}</div>`;
                     
-                    if (data) {
-                        let statusContent = '';
-                        let statusClass = '';
+                    const dayOfWeek = new Date(currentYear, currentMonth, day).getDay();
+                    const isSaturday = dayOfWeek === 6;
+                    const isSunday = dayOfWeek === 0;
+                    
+                    
+                    // --- Absence Days Logic ---
+                    if (data.sickness) {
+                        cellClass += ' bg-red-200 border-2 border-red-400 text-red-800';
+                        cellContent = `<div class="font-bold text-red-800">${day}</div>`; 
+                        cellContent += `<div class="text-xs font-semibold mt-1">Malattia (8.0h)</div>`;
+                    } else if (data.holiday) {
+                        cellClass += ' bg-blue-200 border-2 border-blue-400 text-blue-800';
+                        cellContent = `<div class="font-bold text-blue-800">${day}</div>`; 
+                        cellContent += `<div class="text-xs font-semibold mt-1">Ferie (8.0h)</div>`;
+                    } else if (data.festivita) {
+                        cellClass += ' festivita-day border-2 border-pink-400'; 
+                        cellContent = `<div class="font-bold text-pink-800">${day}</div>`; 
+                        const displayNote = data.note && data.note.includes('Festa Patronale') ? 'Festa Patronale' : 'Festività';
+                        cellContent += `<div class="text-xs font-semibold mt-1">${displayNote} (8.0h)</div>`;
+                    } else if (data.ponte) { 
+                        cellClass += ' ponte-day border-2 border-teal-400'; 
+                        cellContent = `<div class="font-bold text-teal-800">${day}</div>`; 
+                        cellContent += `<div class="text-xs font-semibold mt-1">Ponte (8.0h)</div>`;
+                    } else if (data.permesso && (!data.clockIn || !data.clockOut)) {
+                        // Full day permesso
+                        cellClass += ' permesso-day border-2 border-purple-400';
+                        cellContent = `<div class="font-bold text-purple-800">${day}</div>`; 
+                        cellContent += `<div class="text-xs font-semibold mt-1">Permesso (Giorno Intero - 8.0h)</div>`;
+                    } else if (data.clockIn && data.clockOut) {
+                        // --- Working Day Logic ---
+                        const totalHours = calculateTotalHours(data.clockIn, data.clockOut);
+                        const lateMinutes = data.lates ? calculateLateMinutes(data.clockIn, EXPECTED_SHIFT_START) : 0;
+                        const nightShift = isNightShift(data.clockIn, data.clockOut);
                         
-                        // Check for missing hours first to apply red background
-                        if (data.regularHours < 8 && data.regularHours > 0) {
-                             dayCell.classList.add('bg-red-200', 'border-red-400');
-                             statusContent = `${data.clockIn} - ${data.clockOut}`;
-                             statusClass = 'text-red-800';
-                        } else if (data.sickness) {
-                            dayCell.classList.add('bg-red-200', 'border-red-400');
-                            statusContent = 'Malattia';
-                            statusClass = 'text-red-800';
-                        } else if (data.holiday) {
-                            dayCell.classList.add('bg-blue-200', 'border-blue-400');
-                            statusContent = 'Ferie';
-                            statusClass = 'text-blue-800';
-                        } else if (data.permesso) {
-                            dayCell.classList.add('bg-purple-200', 'border-purple-400');
-                            statusContent = 'Permesso';
-                            statusClass = 'text-purple-800';
-                        } else if (data.absence) {
-                            dayCell.classList.add('bg-red-200', 'border-red-400');
-                            statusContent = 'Assenza';
-                            statusClass = 'text-red-800';
-                        } else if (data.clockIn && data.clockOut) {
-                            const inTime = data.clockIn;
-                            let shiftLabel = '';
-                            if (inTime >= '06:00' && inTime < '14:00') {
-                                dayCell.classList.add('bg-green-200', 'border-green-400');
-                                shiftLabel = SHIFTS.morning.label;
-                            } else if (inTime >= '14:00' && inTime < '22:00') {
-                                dayCell.classList.add('bg-orange-200', 'border-orange-400');
-                                shiftLabel = SHIFTS.afternoon.label;
-                            } else {
-                                dayCell.classList.add('bg-blue-200', 'border-blue-400');
-                                shiftLabel = SHIFTS.night.label;
-                            }
-                            statusContent = shiftLabel;
-                            statusClass = 'text-gray-800';
-                        } else {
-                            dayCell.classList.add('bg-gray-50', 'border-gray-200');
-                        }
-
-                        if (statusContent) {
-                            const statusText = document.createElement('p');
-                            statusText.className = `text-xs mt-1 font-medium ${statusClass}`;
-                            statusText.textContent = statusContent;
-                            dayCell.appendChild(statusText);
-                        }
-
-                        // Add badges for specific conditions
+                        let regularHours = 0;
+                        let overtimeHours = 0;
+                        let permessoHours = 0;
+                        
+                        // Calculate hours breakdown
                         if (data.overtime) {
-                            const overtimeBadge = document.createElement('span');
-                            overtimeBadge.className = 'text-xs font-semibold text-yellow-800 bg-yellow-300 px-2 py-0.5 rounded-full mt-1';
-                            overtimeBadge.textContent = 'OT';
-                            dayCell.appendChild(overtimeBadge);
+                            // If marked as total overtime, all hours are overtime
+                            overtimeHours = totalHours;
+                            regularHours = 0;
+                            permessoHours = 0;
+                        } else if (data.permesso) {
+                            // Partial day permesso: Permesso covers up to 8h regular hours.
+                            if (totalHours >= FULL_DAY_HOURS) {
+                                permessoHours = FULL_DAY_HOURS; 
+                                overtimeHours = totalHours - FULL_DAY_HOURS;
+                            } else {
+                                regularHours = totalHours;
+                                permessoHours = FULL_DAY_HOURS - regularHours;
+                            }
+                        } else {
+                            // Normal day or normal + regular overtime
+                            regularHours = Math.min(totalHours, FULL_DAY_HOURS);
+                            overtimeHours = Math.max(0, totalHours - FULL_DAY_HOURS); 
                         }
-                        if (data.lates) {
-                            const latesBadge = document.createElement('span');
-                            latesBadge.className = 'text-xs font-semibold text-pink-800 bg-pink-300 px-2 py-0.5 rounded-full mt-1';
-                            latesBadge.textContent = 'Ritardo';
-                            dayCell.appendChild(latesBadge);
+
+                        
+                        // --- Apply Styling based on calculated hours and flags (as per request/pic 4) ---
+                        
+                        if (data.overtime || overtimeHours > 0) {
+                            // --- CORREZIONE: LOGICA COLORE NOTTE/STRAORDINARIO ---
+                            if (nightShift && data.overtime) {
+                                cellClass += ' straordinario-day border-2 border-yellow-400'; // Prioritize Yellow/Straordinario on Night Shift if flag is ticked
+                            } else if (nightShift) {
+                                cellClass += ' notte-shift-day border-2 border-gray-700';
+                            } else {
+                                cellClass += ' straordinario-day border-2 border-yellow-400';
+                            }
+                            
+                            const textColor = nightShift && !data.overtime ? 'text-white' : 'text-yellow-800';
+
+                            cellContent = `<div class="font-bold ${textColor}">${day}</div>`; 
+                            cellContent += `<div class="text-xs text-gray-700 ${nightShift && !data.overtime ? 'text-gray-300' : ''}">${data.clockIn} - ${data.clockOut}</div>`;
+                            
+                            let parts = [];
+                            if (regularHours > 0) parts.push(`${regularHours.toFixed(1)}h Ord`);
+                            if (permessoHours > 0) parts.push(`${permessoHours.toFixed(1)}h Perm`);
+                            
+                            if (regularHours === 0 && permessoHours === 0) {
+                                // Full overtime day
+                                cellContent += `<div class="text-xs font-semibold mt-1">STR ${overtimeHours.toFixed(1)}h</div>`;
+                            } else {
+                                // Ord + STR or Perm + STR
+                                cellContent += `<div class="text-xs font-semibold mt-1">${parts.join(' + ')} + ${overtimeHours.toFixed(1)}h STR</div>`;
+                            }
+                            
+                            if (lateMinutes > 0) {
+                                // Override color to red if there's a late (unless it's night shift)
+                                if (!nightShift || (nightShift && lateMinutes > 0 && !data.overtime)) {
+                                    cellClass = cellClass.replace('straordinario-day', 'ritardi-day'); 
+                                    cellClass = cellClass.replace('border-yellow-400', 'border-red-400');
+                                }
+                                cellContent += `<div class="text-xs font-semibold text-red-800 ${nightShift && !data.overtime ? 'text-red-400' : ''}">Ritardi ${formatMinutesToHours(lateMinutes)}</div>`;
+                            }
+                            
+                        } else if (data.permesso) {
+                            cellClass += ' permesso-day border-2 border-purple-400';
+                            cellContent = `<div class="font-bold text-purple-800">${day}</div>`; 
+                            cellContent += `<div class="text-xs text-gray-700">${data.clockIn} - ${data.clockOut}</div>`;
+                            
+                            cellContent += `<div class="text-xs font-semibold mt-1">${regularHours.toFixed(1)}h Ord + ${permessoHours.toFixed(1)}h Perm</div>`;
+                            
+                            if (lateMinutes > 0) {
+                                cellClass = cellClass.replace('permesso-day', 'ritardi-day');
+                                cellClass = cellClass.replace('border-purple-400', 'border-red-400');
+                                cellContent += `<div class="text-xs font-semibold text-red-800">Ritardi ${formatMinutesToHours(lateMinutes)}</div>`; 
+                            }
+                        } else if (nightShift) {
+                            cellClass += ' notte-shift-day border-2 border-gray-700';
+                            cellContent = `<div class="font-bold text-white">${day}</div>`; 
+                            cellContent += `<div class="text-xs text-gray-300">${data.clockIn} - ${data.clockOut}</div>`;
+                            cellContent += `<div class="text-xs font-semibold mt-1">Notte - ${totalHours.toFixed(1)}h Ord</div>`;
+                            if (lateMinutes > 0) cellContent += `<div class="text-xs font-semibold text-red-400">Ritardi ${formatMinutesToHours(lateMinutes)}</div>`;
+                        } else if (lateMinutes > 0) {
+                            // Only Ritardi
+                            cellClass += ' ritardi-day border-2 border-red-400';
+                            cellContent = `<div class="font-bold text-red-800">${day}</div>`; 
+                            cellContent += `<div class="text-xs text-gray-700">${data.clockIn} - ${data.clockOut}</div>`;
+                            cellContent += `<div class="text-xs font-semibold mt-1">Ritardi ${formatMinutesToHours(lateMinutes)}</div>`; 
+                            cellContent += `<div class="text-xs font-semibold">${regularHours.toFixed(1)}h Ord</div>`;
+                        } else {
+                            // Normal working day (<= 8 hours, no flags) 
+                            cellClass += ' regular-day border-2 border-green-400';
+                            cellContent = `<div class="font-bold text-green-800">${day}</div>`; 
+                            cellContent += `<div class="text-xs text-gray-700">${data.clockIn} - ${data.clockOut}</div>`;
+                            cellContent += `<div class="text-xs font-semibold mt-1">${regularHours.toFixed(1)}h Ord</div>`;
                         }
                     } else {
-                        dayCell.classList.add('bg-gray-50', 'border-gray-200');
+                        // No data or just weekend
+                        if (isSaturday) {
+                            cellClass += ' saturday-cell border border-indigo-300';
+                            cellContent = `<div class="font-bold text-indigo-800">${day}</div>`; 
+                        } else if (isSunday) {
+                            cellClass += ' sunday-cell border border-pink-300';
+                            cellContent = `<div class="font-bold text-pink-800">${day}</div>`; 
+                        } else {
+                            cellClass += ' bg-white border border-gray-200 hover:bg-gray-100';
+                            cellContent = `<div class="font-bold text-gray-800">${day}</div>`; 
+                        }
                     }
                     
-                    dayCell.addEventListener('click', () => openModal(day));
+                    dayCell.className = cellClass;
+                    dayCell.innerHTML = cellContent;
+                    dayCell.addEventListener('click', () => openModal(dateKey));
                     calendarEl.appendChild(dayCell);
                 }
             }
 
-            function renderSummary() {
-                if (!activeDayData) {
-                    resetSummary();
-                    return;
-                }
+            function showMessage(message) {
+                messageText.textContent = message;
+                messageBox.classList.remove('hidden');
+            }
 
+            function updateSummary() {
                 let regularHours = 0;
                 let overtimeHours = 0;
-                let missingHours = 0;
                 let sicknessDays = 0;
                 let holidaysDays = 0;
-                let absenceDays = 0;
-                let permessoDays = 0;
-                let latesCount = 0;
+                let festivitaDays = 0;
+                let nightShiftDays = 0; 
+                let ponteDays = 0; 
+                
+                let permessoHours = 0;
+                let totalLateMinutes = 0;
 
-                for (const day in activeDayData) {
-                    const data = activeDayData[day];
+                for (const dateKey in activeDayData) {
+                    const data = activeDayData[dateKey];
+                    
                     if (data.sickness) sicknessDays++;
                     if (data.holiday) holidaysDays++;
-                    if (data.permesso) permessoDays++;
-                    if (data.absence) absenceDays++;
-                    if (data.lates) latesCount++;
-                    if (data.regularHours) regularHours += data.regularHours;
-                    if (data.regularHours < 8 && data.regularHours > 0) {
-                        missingHours += (8 - data.regularHours);
+                    if (data.festivita) festivitaDays++;
+                    if (data.ponte) ponteDays++; 
+                    
+                    if (data.clockIn && data.clockOut) {
+                        const totalHours = calculateTotalHours(data.clockIn, data.clockOut);
+                        if (isNightShift(data.clockIn, data.clockOut) && !data.overtime) nightShiftDays++;
+
+                        if (data.lates) {
+                            totalLateMinutes += calculateLateMinutes(data.clockIn, EXPECTED_SHIFT_START);
+                        }
+
+                        let currentRegular = 0;
+                        let currentOvertime = 0;
+                        let currentPermessoHours = 0;
+                        
+                        if (data.overtime) {
+                            currentOvertime = totalHours;
+                            currentRegular = 0;
+                        } else if (data.permesso) {
+                            // Logica Permesso Parziale o Totale
+                            if (totalHours >= FULL_DAY_HOURS) {
+                                currentPermessoHours = FULL_DAY_HOURS; 
+                                currentOvertime = totalHours - FULL_DAY_HOURS; 
+                                currentRegular = 0;
+                            } else {
+                                currentRegular = totalHours;
+                                currentPermessoHours = FULL_DAY_HOURS - currentRegular;
+                            }
+                        } else if (totalHours > FULL_DAY_HOURS) {
+                            currentRegular = FULL_DAY_HOURS;
+                            currentOvertime = totalHours - FULL_DAY_HOURS;
+                        } else {
+                            currentRegular = totalHours;
+                        }
+                        
+                        overtimeHours += currentOvertime;
+                        permessoHours += currentPermessoHours;
+                        regularHours += currentRegular; 
+
+                    } else if (data.permesso) {
+                        // Full day permesso
+                        permessoHours += FULL_DAY_HOURS;
                     }
-                    if (data.overtimeHours) overtimeHours += data.overtimeHours;
                 }
                 
-                const totalHours = regularHours + overtimeHours;
+                // --- FORMATTAZIONE GIORNI/ORE (Straordinario e Permesso) ---
+                const overtimeDisplay = formatHoursToDays(overtimeHours);
+                const permessoDisplay = formatHoursToDays(permessoHours);
+                const latesDisplay = formatMinutesToHours(totalLateMinutes);
+
+                // Calculate total absence hours for the grand total (all count as 8.0h)
+                const absenceDaysHours = (holidaysDays * FULL_DAY_HOURS) + (festivitaDays * FULL_DAY_HOURS) + (sicknessDays * FULL_DAY_HOURS) + (ponteDays * FULL_DAY_HOURS);
+                const totalAbsenceHours = absenceDaysHours + permessoHours;
+                const totalAllHours = regularHours + overtimeHours + totalAbsenceHours; 
 
                 document.getElementById('summaryRegular').textContent = regularHours.toFixed(1);
-                document.getElementById('summaryOvertime').textContent = overtimeHours.toFixed(1);
-                document.getElementById('summaryMissing').textContent = missingHours.toFixed(1);
-                document.getElementById('summaryTotal').textContent = totalHours.toFixed(1);
+                document.getElementById('summaryOvertime').textContent = overtimeDisplay; 
                 document.getElementById('summarySickness').textContent = sicknessDays;
                 document.getElementById('summaryHolidays').textContent = holidaysDays;
-                document.getElementById('summaryAbsence').textContent = absenceDays;
-                document.getElementById('summaryPermesso').textContent = permessoDays;
-                document.getElementById('summaryLates').textContent = latesCount;
-            }
-
-            function resetSummary() {
-                document.getElementById('summaryRegular').textContent = 0;
-                document.getElementById('summaryOvertime').textContent = 0;
-                document.getElementById('summaryMissing').textContent = 0;
-                document.getElementById('summaryTotal').textContent = 0;
-                document.getElementById('summarySickness').textContent = 0;
-                document.getElementById('summaryHolidays').textContent = 0;
-                document.getElementById('summaryAbsence').textContent = 0;
-                document.getElementById('summaryPermesso').textContent = 0;
-                document.getElementById('summaryLates').textContent = 0;
+                document.getElementById('summaryFestivita').textContent = festivitaDays;
+                document.getElementById('summaryPonte').textContent = ponteDays; 
+                document.getElementById('summaryPermesso').textContent = permessoDisplay;
+                document.getElementById('summaryLates').textContent = latesDisplay; 
+                document.getElementById('summaryNightShift').textContent = `${nightShiftDays} giorni`; 
+                document.getElementById('summaryTotalAllHours').textContent = totalAllHours.toFixed(1);
             }
             
-            function openModal(day) {
-                activeDate = day;
-                modalDateTitleEl.textContent = `${MONTH_NAMES[currentMonth]} ${day}, ${currentYear}`;
+            function openModal(dateKey) {
+                activeDate = dateKey;
+                const [year, month, day] = dateKey.split('-');
+                modalDateTitleEl.textContent = `${MONTH_NAMES[parseInt(month) - 1]} ${parseInt(day)}, ${year}`;
                 entryFormEl.reset();
                 
-                const data = activeDayData[day];
-                if (data) {
-                    clockInEl.value = data.clockIn || '';
-                    clockOutEl.value = data.clockOut || '';
-                    overtimeEl.checked = data.overtime || false;
-                    latesEl.checked = data.lates || false;
+                const data = activeDayData[dateKey] || {}; 
+                
+                clockInEl.value = data.clockIn || '';
+                clockOutEl.value = data.clockOut || '';
+                overtimeEl.checked = data.overtime || false;
+                latesEl.checked = data.lates || false;
 
-                    const leaveCheckboxes = document.querySelectorAll('input[name="leave"]');
-                    leaveCheckboxes.forEach(checkbox => {
-                        checkbox.checked = data[checkbox.value] || false;
-                    });
-                }
+                const leaveCheckboxes = document.querySelectorAll('input[name="leave"]');
+                leaveCheckboxes.forEach(checkbox => {
+                    checkbox.checked = data[checkbox.value] || false;
+                    // Disable Festivita checkbox if the day is an auto-detected Patronal Feast
+                    if (checkbox.value === 'festivita' && data.note && data.note.startsWith('Festa Patronale')) {
+                         checkbox.disabled = true;
+                    } else {
+                         checkbox.disabled = false;
+                    }
+                });
+
+                document.querySelectorAll('.shift-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                });
+
                 entryModalEl.classList.remove('hidden');
             }
 
@@ -598,60 +1420,79 @@
                     overtime: overtimeEl.checked,
                     lates: latesEl.checked,
                     sickness: leaveCheckboxes[0].checked,
-                    absence: leaveCheckboxes[1].checked,
-                    holiday: leaveCheckboxes[2].checked,
+                    holiday: leaveCheckboxes[1].checked,
+                    festivita: leaveCheckboxes[2].checked,
                     permesso: leaveCheckboxes[3].checked,
+                    ponte: leaveCheckboxes[4].checked, 
+                    note: activeDayData[activeDate]?.note || null 
                 };
 
-                let regularHours = 0;
-                let overtimeHours = 0;
+                const isClocked = data.clockIn && data.clockOut;
 
-                if (data.clockIn && data.clockOut) {
-                    const inTime = new Date(`1970-01-01T${data.clockIn}:00`);
-                    let outTime = new Date(`1970-01-01T${data.clockOut}:00`);
+                // Full Day Leave (Sickness, Holiday, Festivita, Ponte) or Full Day Permesso takes precedence
+                const fullDayLeave = data.sickness || data.holiday || data.festivita || data.ponte;
+                
+                const isAutoFestivita = activeDayData[activeDate]?.note && activeDayData[activeDate]?.note.startsWith('Festa Patronale');
 
-                    if (outTime < inTime) {
-                        outTime = new Date(outTime.getTime() + 24 * 60 * 60 * 1000);
+                if (fullDayLeave && !isAutoFestivita) {
+                    // If any full-day absence is checked (and it's not the auto-festivity day itself)
+                    data.clockIn = '';
+                    data.clockOut = '';
+                    data.overtime = false;
+                    data.lates = false;
+                    data.festivita = false; 
+                    data.note = null;
+
+                    // Ensure only one full-day leave type is true
+                    ['sickness', 'holiday', 'festivita', 'ponte'].forEach(type => {
+                        if (data[type]) {
+                            ['sickness', 'holiday', 'festivita', 'ponte'].forEach(otherType => {
+                                if (otherType !== type) data[otherType] = false;
+                            });
+                            data.permesso = false;
+                        }
+                    });
+                    
+                    if (data.permesso && !isClocked) { // Full day permesso also clears others
+                        data.sickness = data.holiday = data.festivita = data.ponte = false;
+                    }
+                    
+                } else if (isClocked) {
+                    // Working Day (Clock In/Out set)
+                    
+                    data.sickness = false;
+                    data.holiday = false;
+                    data.ponte = false; 
+
+                    // Allow partial permesso and keep festivita status if auto-set
+                    if (data.festivita && !isAutoFestivita) { 
+                        data.sickness = data.holiday = data.permesso = data.ponte = false;
+                    }
+                    if (data.permesso) {
+                        data.sickness = data.holiday = data.festivita = data.ponte = false;
+                        if (isAutoFestivita) {
+                            data.festivita = false; 
+                            data.note = 'Permesso';
+                        }
                     }
 
-                    const diffInMs = outTime - inTime;
-                    const hours = diffInMs / (1000 * 60 * 60);
-                    regularHours = Math.max(0, Math.min(8, hours));
-                    overtimeHours = Math.max(0, hours - 8);
+                } else {
+                    // Neither clocked nor full absence chosen
+                    data.sickness = data.holiday = data.permesso = data.ponte = false;
+                    data.festivita = isAutoFestivita ? true : false; 
+                    data.overtime = false;
+                    data.lates = false;
+                    data.note = isAutoFestivita ? activeDayData[activeDate].note : null;
                 }
-                
-                data.regularHours = regularHours;
-                data.overtimeHours = overtimeHours;
+
                 
                 if (!activeDayData) {
                     activeDayData = {};
                 }
                 activeDayData[activeDate] = data;
 
-                // 1. Save to local storage and re-render calendar (Synchronous)
                 saveData();
                 closeModal();
-
-                // 2. Prepare data for Firestore with full date and server timestamp
-                const entryDataForFirestore = {
-                    ...data,
-                    day: activeDate,
-                    month: currentMonth + 1,
-                    year: currentYear,
-                    fullDate: new Date(currentYear, currentMonth, activeDate).toISOString().split('T')[0],
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                // 3. Save to Firestore (Asynchronous)
-                db.collection("timesheet_entries").add(entryDataForFirestore)
-                .then((docRef) => {
-                    console.log("Document successfully written to Firestore with ID: ", docRef.id);
-                })
-                .catch((error) => {
-                    console.error("Error writing document to Firestore: ", error);
-                    // Show a message if online save fails
-                    showMessage(`Attenzione: Salvataggio online fallito. Dati salvati solo localmente. Errore: ${error.message.substring(0, 100)}...`);
-                });
             }
             
             function deleteEntry() {
@@ -665,15 +1506,15 @@
             }
 
             function openPdfModal() {
-                pdfMonthSelect.value = currentMonth;
-                pdfYearInput.value = currentYear;
+                document.getElementById('pdfMonthSelect').value = currentMonth;
+                document.getElementById('pdfYearInput').value = currentYear;
                 pdfSelectionModal.classList.remove('hidden');
             }
 
             function handleGeneratePdf() {
-                const { jsPDF } = window.jspdf;
-                const pdfMonth = parseInt(pdfMonthSelect.value);
-                const pdfYear = parseInt(pdfYearInput.value);
+                 const { jsPDF } = window.jspdf;
+                const pdfMonth = parseInt(document.getElementById('pdfMonthSelect').value);
+                const pdfYear = parseInt(document.getElementById('pdfYearInput').value);
 
                 const key = `${storageKeyPrefix}${pdfYear}-${pdfMonth + 1}`;
                 const storedData = localStorage.getItem(key);
@@ -681,75 +1522,179 @@
                 
                 let regularHours = 0;
                 let overtimeHours = 0;
-                let missingHours = 0;
                 let sicknessDays = 0;
                 let holidaysDays = 0;
-                let absenceDays = 0;
-                let permessoDays = 0;
-                let latesCount = 0;
+                let festivitaDays = 0;
+                let permessoHours = 0;
+                let ponteDays = 0; 
+                let totalLateMinutes = 0;
+                let nightShiftDays = 0;
 
-                for (const day in dataToPrint) {
-                    const data = dataToPrint[day];
+                for (const key in dataToPrint) {
+                    const data = dataToPrint[key];
+                    let currentRegular = 0;
+                    let currentOvertime = 0;
+                    let currentPermessoHours = 0;
+
                     if (data.sickness) sicknessDays++;
                     if (data.holiday) holidaysDays++;
-                    if (data.permesso) permessoDays++;
-                    if (data.absence) absenceDays++;
-                    if (data.lates) latesCount++;
-                    if (data.regularHours) regularHours += data.regularHours;
-                    if (data.regularHours < 8 && data.regularHours > 0) {
-                        missingHours += (8 - data.regularHours);
+                    if (data.festivita) festivitaDays++;
+                    if (data.ponte) ponteDays++; 
+                    
+                    if (data.clockIn && data.clockOut) {
+                        const totalHours = calculateTotalHours(data.clockIn, data.clockOut);
+                        if (isNightShift(data.clockIn, data.clockOut) && !data.overtime) nightShiftDays++;
+                        
+                        if (data.lates) {
+                            totalLateMinutes += calculateLateMinutes(data.clockIn, EXPECTED_SHIFT_START);
+                        }
+
+                        // Hours distribution (Same corrected logic as updateSummary)
+                         if (data.overtime) {
+                            currentOvertime = totalHours;
+                            currentRegular = 0;
+                        } else if (data.permesso) {
+                            if (totalHours >= FULL_DAY_HOURS) {
+                                currentPermessoHours = FULL_DAY_HOURS;
+                                currentOvertime = totalHours - FULL_DAY_HOURS;
+                                currentRegular = 0;
+                            } else {
+                                currentRegular = totalHours;
+                                currentPermessoHours = FULL_DAY_HOURS - currentRegular;
+                            }
+                        } else if (totalHours > FULL_DAY_HOURS) {
+                            currentRegular = FULL_DAY_HOURS;
+                            currentOvertime = totalHours - FULL_DAY_HOURS;
+                        } else {
+                            currentRegular = totalHours;
+                        }
+                        
+                        // Add to totals
+                        overtimeHours += currentOvertime;
+                        permessoHours += currentPermessoHours;
+                        regularHours += currentRegular; 
+                        
+                    } else if (data.permesso) {
+                        permessoHours += FULL_DAY_HOURS;
                     }
-                    if (data.overtimeHours) overtimeHours += data.overtimeHours;
                 }
                 
-                const totalHours = regularHours + overtimeHours;
+                // --- Day/Hour Calculation for PDF Summary ---
+                const totalAbsenceHours = (holidaysDays * FULL_DAY_HOURS) + (festivitaDays * FULL_DAY_HOURS) + (sicknessDays * FULL_DAY_HOURS) + (ponteDays * FULL_DAY_HOURS) + permessoHours;
+                const totalAllHours = regularHours + overtimeHours + totalAbsenceHours;
 
                 const doc = new jsPDF('p', 'pt', 'a4');
-                
                 doc.setFont('Helvetica', 'normal');
                 
-                // Add the header to the PDF
                 doc.setFontSize(18);
-                doc.text(`Cartellino Presenze - ${MONTH_NAMES[pdfMonth]} ${pdfYear}`, doc.internal.pageSize.getWidth() / 2, 40, { align: 'center' });
+                doc.text(`Cartellino Presenze Saad Mounir - ${MONTH_NAMES[pdfMonth]} ${pdfYear}`, doc.internal.pageSize.getWidth() / 2, 40, { align: 'center' });
 
-                // Define the table data
-                const head = [['Giorno', 'Data', 'Ore', 'Ingresso', 'Uscita', 'Straordinario', 'Ritardi', 'Stato']];
+                const head = [['Giorno', 'Data', 'Ore Totali', 'Ingresso', 'Uscita', 'Straordinario (h)', 'Ritardi (min)', 'Stato']];
                 const body = [];
                 const daysInMonth = new Date(pdfYear, pdfMonth + 1, 0).getDate();
                 const weekdays = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+                const rowColors = []; 
 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const date = new Date(pdfYear, pdfMonth, day);
                     const dayOfWeek = weekdays[date.getDay()];
-                    const dayData = dataToPrint[day] || {};
+                    const dateKey = `${pdfYear}-${String(pdfMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dayData = dataToPrint[dateKey] || {};
                     
                     let status = [];
-                    if (dayData.sickness) status.push('Malattia');
-                    if (dayData.holiday) status.push('Ferie');
-                    if (dayData.permesso) status.push('Permesso');
-                    if (dayData.absence) status.push('Assenza');
-                    if (dayData.lates) status.push('Ritardo');
-                    if (dayData.overtimeHours > 0) status.push('Straordinario');
-                    if (!dayData.sickness && !dayData.holiday && !dayData.permesso && !dayData.absence) {
-                        if (dayData.regularHours > 0) {
-                            status.push('Normale');
-                        } else if (dayData.regularHours === 0 && (dayData.clockIn || dayData.clockOut)) {
-                            status.push('Errore');
+                    let totalHours = 0;
+                    let dayOvertimeHours = 0;
+                    let dayRegularHours = 0;
+                    let lateMinutes = 0;
+                    let dayPermessoHours = 0;
+                    let color = '#FFFFFF'; 
+
+                    if (dayData.clockIn && dayData.clockOut) {
+                        totalHours = calculateTotalHours(dayData.clockIn, dayData.clockOut);
+                        lateMinutes = dayData.lates ? calculateLateMinutes(dayData.clockIn, EXPECTED_SHIFT_START) : 0;
+                        const nightShift = isNightShift(dayData.clockIn, dayData.clockOut);
+
+                        // Recalculate breakdown for PDF row (same logic as summary)
+                        if (dayData.overtime) {
+                            dayOvertimeHours = totalHours;
+                            status.push('Straordinario (Totale)');
+                            color = '#FFFBEB'; 
+                        } else if (dayData.permesso) {
+                            if (totalHours >= FULL_DAY_HOURS) {
+                                dayPermessoHours = FULL_DAY_HOURS;
+                                dayOvertimeHours = totalHours - FULL_DAY_HOURS;
+                                status.push(`Permesso ${dayPermessoHours.toFixed(1)}h`);
+                                if (dayOvertimeHours > 0) status.push('STR');
+                            } else {
+                                dayRegularHours = totalHours;
+                                dayPermessoHours = FULL_DAY_HOURS - dayRegularHours;
+                                status.push(`Permesso ${dayPermessoHours.toFixed(1)}h`);
+                            }
+                            color = '#EDE9FE'; 
+                        } else if (totalHours > FULL_DAY_HOURS) {
+                            dayRegularHours = FULL_DAY_HOURS;
+                            dayOvertimeHours = totalHours - FULL_DAY_HOURS;
+                            status.push('Ord + STR');
+                            color = '#FFFBEB';
                         } else {
-                            status.push('Non inserito');
+                            dayRegularHours = totalHours;
+                            status.push('Normale');
+                            color = '#D1FAE5'; 
                         }
+
+                        if (dayData.lates && lateMinutes > 0) {
+                            status.push(`Ritardo (${formatMinutesToHours(lateMinutes)})`);
+                            if (color !== '#FFFBEB' && color !== '#EDE9FE' && color !== '#374151') { color = '#FEE2E2'; }
+                        }
+                        
+                        if (nightShift) {
+                            if (!dayData.overtime) { 
+                                status.push('Notte');
+                                color = '#374151'; 
+                            } else {
+                                status.push('Notte (STR)');
+                                // Color remains yellow/straordinario
+                            }
+                        }
+
+                    } else if (dayData.sickness) {
+                        status.push('Malattia');
+                        color = '#FEE2E2'; 
+                        totalHours = FULL_DAY_HOURS;
+                    } else if (dayData.holiday) {
+                        status.push('Ferie');
+                        color = '#DBEAFE'; 
+                        totalHours = FULL_DAY_HOURS;
+                    } else if (dayData.festivita) {
+                        status.push(`${dayData.note || 'Festività'}`);
+                        color = '#FCE7F3'; 
+                        totalHours = FULL_DAY_HOURS;
+                    } else if (dayData.permesso) {
+                        status.push(`Permesso ${FULL_DAY_HOURS}.0h (Giorno Intero)`);
+                        color = '#EDE9FE'; 
+                        totalHours = FULL_DAY_HOURS;
+                    } else if (dayData.ponte) { 
+                        status.push(`Ponte (Giorno Libero Pagato)`);
+                        color = '#D1FAE5'; 
+                        totalHours = FULL_DAY_HOURS;
+                    } else {
+                        status.push('Non inserito');
+                        if (date.getDay() === 0) { color = '#FCE7F3'; } 
+                        else if (date.getDay() === 6) { color = '#E0E7FF'; } 
                     }
 
                     body.push([
                         dayOfWeek,
                         day.toString(),
-                        dayData.regularHours ? dayData.regularHours.toFixed(1) : '0',
+                        totalHours > 0 ? totalHours.toFixed(1) : '0',
                         dayData.clockIn || '-',
                         dayData.clockOut || '-',
-                        dayData.overtimeHours ? dayData.overtimeHours.toFixed(1) : '0',
-                        dayData.lates ? 'Sì' : 'No',
+                        dayOvertimeHours > 0 ? dayOvertimeHours.toFixed(1) : '0',
+                        lateMinutes > 0 ? `${lateMinutes}` : '0',
                         status.join(', ')
                     ]);
+                    
+                    rowColors.push(color);
                 }
 
                 doc.autoTable({
@@ -758,26 +1703,31 @@
                     body: body,
                     theme: 'grid',
                     styles: { fontSize: 7, cellPadding: 2, halign: 'center' },
-                    headStyles: { fillColor: '#E5E7EB', textColor: '#4B5563', fontStyle: 'bold' }
+                    headStyles: { fillColor: '#E5E7EB', textColor: '#4B5563', fontStyle: 'bold' },
+                    didParseCell: function(data) {
+                        data.cell.styles.fillColor = rowColors[data.row.index];
+                        if (rowColors[data.row.index] === '#374151') {
+                             data.cell.styles.textColor = '#FFFFFF';
+                        }
+                    }
                 });
 
-                // Add the summary to the PDF after the table
                 const finalY = doc.autoTable.previous.finalY;
                 doc.setFontSize(12);
                 doc.text('Riepilogo Mensile', 40, finalY + 20);
 
                 const summaryData = [
-                    ['Ore Ordinarie', 'Ore di Straordinario', 'Ore Mancanti', 'Malattia', 'Ferie', 'Assenze', 'Permesso', 'Ritardi', 'Totale Ore Lavorate'],
+                    ['Ore Ordinarie (h)', 'Straordinario', 'Permesso', 'Ferie (giorni)', 'Festività (giorni)', 'Malattia (giorni)', 'Ponte (giorni)', 'Ritardi (totale)', 'Totale Ore Contabili'],
                     [
                         regularHours.toFixed(1),
-                        overtimeHours.toFixed(1),
-                        missingHours.toFixed(1),
-                        sicknessDays,
+                        formatHoursToDays(overtimeHours), 
+                        formatHoursToDays(permessoHours), 
                         holidaysDays,
-                        absenceDays,
-                        permessoDays,
-                        latesCount,
-                        totalHours.toFixed(1)
+                        festivitaDays,
+                        sicknessDays,
+                        ponteDays, 
+                        formatMinutesToHours(totalLateMinutes), 
+                        totalAllHours.toFixed(1) 
                     ]
                 ];
 
@@ -789,9 +1739,7 @@
                     styles: { fontSize: 8, cellPadding: 5, halign: 'center' }
                 });
 
-
-                // Save the PDF file
-                doc.save(`Cartellino-Presenze-${MONTH_NAMES[pdfMonth]}-${pdfYear}.pdf`);
+                doc.save(`Cartellino-Presenze-Saad-Mounir-${MONTH_NAMES[pdfMonth]}-${pdfYear}.pdf`);
 
                 pdfSelectionModal.classList.add('hidden');
             }
@@ -805,12 +1753,19 @@
                             dataToExport[key] = localStorage.getItem(key);
                         }
                     }
+                    // Also export city preference
+                    const cityKey = storageKeyPrefix + 'city';
+                    const savedCity = localStorage.getItem(cityKey);
+                    if (savedCity) {
+                        dataToExport[cityKey] = savedCity;
+                    }
+
                     const dataStr = JSON.stringify(dataToExport);
                     const blob = new Blob([dataStr], {type: 'application/json'});
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'timecard-data.json';
+                    a.download = 'timecard-saad-mounir-data.json';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -833,7 +1788,12 @@
                         const importedData = JSON.parse(e.target.result);
                         for (const key in importedData) {
                             if (key.startsWith(storageKeyPrefix)) {
-                                localStorage.setItem(key, importedData[key]);
+                                if (key === storageKeyPrefix + 'city') {
+                                    localStorage.setItem(key, importedData[key]);
+                                    citySelectEl.value = importedData[key];
+                                } else {
+                                    localStorage.setItem(key, importedData[key]);
+                                }
                             }
                         }
                         loadDataAndRender();
